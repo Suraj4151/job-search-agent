@@ -1,0 +1,35 @@
+name: AI Stock Agent Daily Run
+
+on:
+  schedule:
+    - cron: "0 13 * * *"  # runs daily at 13:00 UTC (~8:00 AM Central)
+  workflow_dispatch:      # allows manual run from GitHub UI
+
+jobs:
+  run-ai-stock-agent:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -r ai_stock_agent/requirements.txt
+
+      - name: Run AI stock agent
+        env:
+          NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
+        run: |
+          python ai_stock_agent/ai_agent.py
+
+      - name: Upload report as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-ai-stock-report
+          path: daily_ai_report_*.json
